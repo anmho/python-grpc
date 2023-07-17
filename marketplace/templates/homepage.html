@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recommendations</title>
+  </head>
+  <body>
+    {% for rec in recommendations %}
+    <li><a>{{rec.title}}</a></li>
+
+    {% endfor %}
+  </body>
+</html>
