@@ -9,4 +9,6 @@ def test_recommendations():
         user_id=1, category=BookCategory.MYSTERY, max_results=1
     )
 
-    service.Recommend(request, None)
+    response = service.Recommend(request, None)
+
+    print(response)
