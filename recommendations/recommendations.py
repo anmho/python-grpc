@@ -1,4 +1,4 @@
-
+from signal import signal, SIGTERM
 from concurrent import futures # grpc needs a thread pool
 import random
 
@@ -65,8 +65,35 @@ def serve():
     recommendations_pb2_grpc.add_RecommendationsServicer_to_server(
         RecommendationService(), server
     )
-    server.add_insecure_port("[::]:50051") # listen to all addresses on port 50051
+
+    with open("server.key", "rb") as fp:
+        server_key = fp.read()
+    with open("server.pem", "rb") as fp:
+        server_cert = fp.read()
+
+    with open("ca.pem", "rb") as fp:
+        ca_cert = fp.read()
+    
+    # Send the 
+    creds = grpc.ssl_server_credentials(
+        [(server_key, server_cert)],
+        root_certificates=ca_cert,
+        require_client_auth=True,
+    )
+
+
+    server.add_secure_port("[::]:443", creds)
+    # server.add_insecure_port("[::]:50051") # listen to all addresses on port 50051
     server.start()
+
+    def handle_sigterm(*_):
+        print("Received shutdown signal")
+        all_rpcs_done_event = server.stop(30)
+        all_rpcs_done_event.wait(30)
+        print("Shut down gracefully")
+
+    signal(SIGTERM, handle_sigterm)
+
     server.wait_for_termination()
 
 if __name__ == "__main__":

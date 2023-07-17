@@ -11,4 +11,4 @@ def test_recommendations():
 
     response = service.Recommend(request, None)
 
-    print(response)
+    assert len(response.recommendations) == 1

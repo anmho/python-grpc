@@ -10,8 +10,28 @@ from recommendations_pb2_grpc import RecommendationsStub
 app = Flask(__name__)
 
 recommendations_host = os.getenv("RECOMMENDATIONS_HOST", "localhost")
-recommendations_channel = grpc.insecure_channel(
-    f"{recommendations_host}:50051"
+
+# Insecure Channel
+# recommendations_channel = grpc.insecure_channel(
+#     f"{recommendations_host}:50051"
+# )
+
+# Read the public certificate
+
+with open("client.key", "rb") as fp:
+    client_key = fp.read()
+with open("client.pem", "rb") as fp:
+    client_cert = fp.read()
+
+with open("ca.pem", "rb") as fp:
+    ca_cert = fp.read()
+creds = grpc.ssl_channel_credentials(ca_cert, client_key, client_cert)
+
+
+# Load credentials from certificate
+creds = grpc.ssl_channel_credentials(ca_cert)
+recommendations_channel = grpc.secure_channel(
+    f"{recommendations_host}:443", creds
 )
 
 recommendations_client = RecommendationsStub(recommendations_channel)
